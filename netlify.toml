@@ -1,0 +1,9 @@
+[build.environment]
+NODE_VERSION = '20'
+# Prevent Netlify from running npm install before our pnpm command.
+NPM_FLAGS = '--version'
+
+[build]
+base = 'apps/reader'
+# Let Netlify detect and serve the Next.js output; do not publish `.next` as static files.
+command = 'cd ../.. && corepack enable && pnpm install --frozen-lockfile && pnpm --filter @flow/reader build'

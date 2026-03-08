@@ -1,11 +1,10 @@
 [build.environment]
-NODE_VERSION = "16"
+NODE_VERSION = '20'
 # https://github.com/netlify/build/issues/1633#issuecomment-907246600
-NPM_FLAGS = "--version" # prevent Netlify npm install
+NPM_FLAGS = '--version' # prevent Netlify npm install
 
 [build]
-# Set `base` to repo directory in Netlify UI
-# base = 'reader'
-publish = ".next"
-# https://answers.netlify.com/t/using-pnpm-and-pnpm-workspaces/2759
-command = "npx pnpm i --store=node_modules/.pnpm-store && npx pnpm -F reader... build"
+# This file assumes Netlify's base directory is `apps/reader`.
+# For one-click monorepo deploys from the repo root, use the root `netlify.toml`.
+# Let Netlify detect and serve the Next.js output; do not publish `.next` as static files.
+command = 'cd ../.. && corepack enable && pnpm install --frozen-lockfile && pnpm --filter @flow/reader build'
