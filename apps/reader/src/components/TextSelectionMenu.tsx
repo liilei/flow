@@ -72,6 +72,7 @@ export const TextSelectionMenu: React.FC<TextSelectionMenuProps> = ({
   if (!anchorRect) return null
 
   const contents = range.cloneContents()
+  const containsImages = !!contents.querySelector?.('img')
   const text = contents.textContent?.trim()
   if (!text) return null
 
@@ -85,6 +86,7 @@ export const TextSelectionMenu: React.FC<TextSelectionMenuProps> = ({
       viewRect={el.getBoundingClientRect()}
       text={text}
       forward={forward}
+      canAnnotate={!containsImages}
       hide={() => {
         if (selection) {
           selection.removeAllRanges()
@@ -112,6 +114,7 @@ interface TextSelectionMenuRendererProps {
   viewRect: DOMRect
   text: string
   forward: boolean
+  canAnnotate: boolean
   hide: () => void
 }
 const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
@@ -122,6 +125,7 @@ const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
   viewRect,
   forward,
   text,
+  canAnnotate,
   hide,
 }) => {
   const setAction = useSetAction()
@@ -131,8 +135,10 @@ const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
   const mobile = useMobile()
   const t = useTranslation('menu')
 
-  const cfi = tab.rangeToCfi(range)
-  const annotation = tab.book.annotations.find((a) => a.cfi === cfi)
+  const cfi = canAnnotate ? tab.rangeToCfi(range) : undefined
+  const annotation = cfi
+    ? tab.book.annotations.find((a) => a.cfi === cfi)
+    : undefined
   const [annotate, setAnnotate] = useState(!!annotation)
 
   const position = forward
@@ -226,7 +232,9 @@ const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
               title={t('annotate')}
               Icon={MdOutlineEdit}
               size={ICON_SIZE}
+              className={clsx(!canAnnotate && 'hidden')}
               onClick={() => {
+                if (!canAnnotate) return
                 setAnnotate(true)
               }}
             />
@@ -254,7 +262,8 @@ const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
           </div>
         )}
         <div className="space-y-2">
-          {keys(typeMap).map((type) => (
+          {canAnnotate &&
+            keys(typeMap).map((type) => (
             <div key={type} className="flex gap-2">
               {keys(colorMap).map((color) => (
                 <div
@@ -270,6 +279,7 @@ const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
                     typeMap[type].class,
                   )}
                   onClick={() => {
+                    if (!cfi) return
                     tab.putAnnotation(
                       type,
                       cfi,
@@ -284,9 +294,9 @@ const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
                 </div>
               ))}
             </div>
-          ))}
+            ))}
         </div>
-        {annotate && (
+        {annotate && canAnnotate && (
           <div className="mt-3 flex">
             {annotation && (
               <Button
@@ -304,6 +314,7 @@ const TextSelectionMenuRenderer: React.FC<TextSelectionMenuRendererProps> = ({
               className="ml-auto"
               compact
               onClick={() => {
+                if (!cfi) return
                 tab.putAnnotation(
                   annotation?.type ?? 'highlight',
                   cfi,

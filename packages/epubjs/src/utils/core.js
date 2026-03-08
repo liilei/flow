@@ -520,8 +520,9 @@ export function type(obj) {
 export function parse(markup, mime, forceXMLDom) {
   var doc
   var Parser
+  var usesXmlDom = typeof DOMParser === 'undefined' || forceXMLDom
 
-  if (typeof DOMParser === 'undefined' || forceXMLDom) {
+  if (usesXmlDom) {
     Parser = XMLDOMParser
   } else {
     Parser = DOMParser
@@ -531,6 +532,12 @@ export function parse(markup, mime, forceXMLDom) {
   // https://www.w3.org/International/questions/qa-byte-order-mark
   if (markup.charCodeAt(0) === 0xfeff) {
     markup = markup.slice(1)
+  }
+
+  // Align xmldom text-node line ending behavior with browser DOMParser,
+  // which normalizes CRLF / CR line endings while parsing XML/XHTML.
+  if (usesXmlDom) {
+    markup = markup.replace(/\r\n?/g, '\n')
   }
 
   doc = new Parser().parseFromString(markup, mime)

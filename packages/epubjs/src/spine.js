@@ -57,7 +57,7 @@ class Spine {
       item.cfiBase = this.epubcfi.generateChapterComponent(
         this.spineNodeIndex,
         item.index,
-        item.id,
+        item.idref || item.id,
       )
 
       if (item.href) {

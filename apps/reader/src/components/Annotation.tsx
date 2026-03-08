@@ -111,27 +111,36 @@ const Annotation: React.FC<AnnotationProps> = ({ tab, annotation }) => {
   const { rendition } = useSnapshot(tab)
 
   useEffect(() => {
-    const h = rendition?.annotations[annotation.type](
-      annotation.cfi,
-      undefined,
-      undefined,
-      undefined,
-      {
-        fill: colorMap[annotation.color],
-        'fill-opacity': '0.5',
-      },
-    )
+    try {
+      const h = rendition?.annotations[annotation.type](
+        annotation.cfi,
+        undefined,
+        undefined,
+        undefined,
+        {
+          fill: colorMap[annotation.color],
+          'fill-opacity': '0.5',
+        },
+      )
 
-    const g = h?.mark?.element as SVGGElement
+      if (!h) {
+        tab.removeAnnotation(annotation.cfi)
+        return
+      }
 
-    // `<rect>` should be reserved to response `click`
-    g?.addEventListener('click', () => {
-      tab.setAnnotationRange(annotation.cfi)
-      setClickedAnnotation(true)
-    })
+      const g = h.mark?.element as SVGGElement
 
-    return () => {
-      rendition?.annotations.remove(annotation.cfi, annotation.type)
+      // `<rect>` should be reserved to response `click`
+      g?.addEventListener('click', () => {
+        tab.setAnnotationRange(annotation.cfi)
+        setClickedAnnotation(true)
+      })
+
+      return () => {
+        rendition?.annotations.remove(annotation.cfi, annotation.type)
+      }
+    } catch (error) {
+      tab.removeAnnotation(annotation.cfi)
     }
   }, [
     annotation.cfi,

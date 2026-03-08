@@ -617,6 +617,9 @@ class IframeView {
       styles,
     )
     let range = this.contents.range(cfiRange)
+    if (!range) {
+      return
+    }
 
     let emitter = () => {
       this.emit(EVENTS.VIEWS.MARK_CLICKED, cfiRange, data)
@@ -661,6 +664,9 @@ class IframeView {
       styles,
     )
     let range = this.contents.range(cfiRange)
+    if (!range) {
+      return
+    }
     let emitter = () => {
       this.emit(EVENTS.VIEWS.MARK_CLICKED, cfiRange, data)
     }

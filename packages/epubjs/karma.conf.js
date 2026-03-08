@@ -11,6 +11,14 @@ module.exports = function (config) {
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
 
+    plugins: [
+      require('karma-mocha'),
+      require('karma-webpack'),
+      require('karma-sourcemap-loader'),
+      require('karma-chrome-launcher'),
+      require('karma-mocha-reporter'),
+    ],
+
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     frameworks: ['mocha'],
